@@ -6,7 +6,7 @@ import faker from 'faker';
 
 const POKEAPI_ROOT = 'http://pokeapi.co/api/v2/';
 
-import { Database, aql } from 'arangojs';
+// import { Database, aql } from 'arangojs';
 
 
 const jq = require('node-jq');
@@ -15,11 +15,13 @@ const typeDefs = /* GraphQL */`
     type Query {
       hello(name: String): String!
       pokemonById(id: Int!): Pokemon
+      pokemonByIds(ids: [Int!]!): [Pokemon]
     }
     type Pokemon {
       id: Int!
       name: String!
-      # weight: Int!
+      weight: Int!
+      hello: String!
     }
     # type User {
     #   id: ID
@@ -40,10 +42,14 @@ const getResolvers = () => {
         console.log(id);
         const str = await rp(`${POKEAPI_ROOT}pokemon/${id}`);
         // console.log(str);
-        const obj = await jq.run('.', str, { input: 'string', output: 'json' });
-        // console.log(obj);
-        console.log(obj.name);
-        return obj;
+        return jq.run('.', str, { input: 'string', output: 'json' });
+      },
+      pokemonByIds: (_, { ids }) => {
+        const fn = async (id) => {
+          const str = await rp(`${POKEAPI_ROOT}pokemon/${id}`);
+          return jq.run('.', str, { input: 'string', output: 'json' });
+        };
+        return ids.map(fn);
       },
     },
     // Task: {
@@ -54,10 +60,11 @@ const getResolvers = () => {
     //   children: () => times(faker.random.arrayElement([0, 0, 1, 1, 1, 2, 2, 3]), () => ({})),
     // },
     Pokemon: {
-      name: obj =>
-        // console.log(obj);
-        obj.name
-      ,
+      hello: ({ name }) => `Hello ${name || 'World'}`,
+      // name: ({ name }) => name,
+      //   // console.log(obj);
+      //   obj.name
+      // ,
     },
 
   };
