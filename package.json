@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "babel-node --presets env -- gql.js;",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "client": "cd view; npm start"
   },
   "author": "",
   "license": "ISC",
